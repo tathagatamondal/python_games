@@ -1,0 +1,81 @@
+import random
+
+# Define the Question class
+class Question:
+    def __init__(self, question_text, options, correct_answer):
+        self.question_text = question_text
+        self.options = options
+        self.correct_answer = correct_answer
+
+    def is_correct(self, answer):
+        return self.correct_answer == answer
+
+    def __repr__(self):
+        return f"Question({self.question_text}, {self.options}, {self.correct_answer})"
+
+
+# Define the Game class
+class Game:
+    def __init__(self, questions):
+        self.questions = questions
+        self.current_question_index = 0
+        self.lifelines = {"50-50": self.use_fifty_fifty, "Phone a Friend": self.phone_a_friend}
+
+    def ask_question(self):
+        question = self.questions[self.current_question_index]
+        print(f"Question {self.current_question_index + 1}: {question.question_text}")
+        for i, option in enumerate(question.options):
+            print(f"{chr(65 + i)}. {option}")
+        return question
+
+    def use_fifty_fifty(self, question):
+        correct_option = question.correct_answer
+        options = [correct_option]
+        while len(options) < 2:
+            option = random.choice(question.options)
+            if option != correct_option and option not in options:
+                options.append(option)
+        random.shuffle(options)
+        print(f"50-50 Lifeline used. Options: {options}")
+
+    def phone_a_friend(self, question):
+        print("Phone a Friend Lifeline used.")
+        print(f"Friend: I'm pretty sure the answer is {question.correct_answer}")
+
+    def play(self):
+        print("Welcome to 'Who Wants to Be a Millionaire?'")
+        while self.current_question_index < len(self.questions):
+            question = self.ask_question()
+            answer = input("Enter your answer (A/B/C/D) or type 'lifeline' to use a lifeline: ").strip().upper()
+
+            if answer == "LIFELINE":
+                lifeline = input("Choose a lifeline (50-50/Phone a Friend): ").strip()
+                if lifeline in self.lifelines:
+                    self.lifelines[lifeline](question)
+                    answer = input("Enter your answer (A/B/C/D): ").strip().upper()
+                else:
+                    print("Invalid lifeline choice.")
+
+            if question.is_correct(question.options[ord(answer) - 65]):
+                print("Correct!")
+                self.current_question_index += 1
+            else:
+                print("Incorrect. Game over.")
+                break
+
+        if self.current_question_index == len(self.questions):
+            print("Congratulations! You've won the game!")
+
+
+# Sample questions for the game
+questions = [
+    Question("What is the capital of France?", ["Berlin", "Madrid", "Paris", "Rome"], "Paris"),
+    Question("Who wrote 'Hamlet'?", ["Charles Dickens", "J.K. Rowling", "Mark Twain", "William Shakespeare"], "William Shakespeare"),
+    Question("What is the largest planet in our Solar System?", ["Earth", "Jupiter", "Mars", "Venus"], "Jupiter"),
+    Question("Which element has the chemical symbol 'O'?", ["Oxygen", "Gold", "Silver", "Hydrogen"], "Oxygen")
+]
+
+# Main game loop
+if __name__ == "__main__":
+    game = Game(questions)
+    game.play()
